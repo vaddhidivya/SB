@@ -1,0 +1,7 @@
+{
+  "name": "Copy of Middle Class Budget",
+  "description": "A sophisticated glassmorphism budgeting application tailored for middle-class financial management with deep analytical insights and AI-driven nudges.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
