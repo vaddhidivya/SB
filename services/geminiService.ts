@@ -2,14 +2,25 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Transaction, Insight } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const getAiClient = () => {
+  if (process.env.API_KEY) {
+    return new GoogleGenAI({ apiKey: process.env.API_KEY });
+  }
+  return null;
+};
 
 export const generateFinancialInsights = async (transactions: Transaction[]): Promise<Insight[]> => {
   try {
+    const ai = getAiClient();
+    if (!ai) {
+      console.warn("Gemini API Key is missing. Returning mock insights.");
+      throw new Error("API Key missing");
+    }
+
     const summary = transactions.map(t => `${t.date}: ${t.merchant} ($${t.amount}) [${t.category}]`).join('\n');
     
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.0-flash',
       contents: `Analyze these transactions for financial coaching. 
       Specifically:
       1. Identify "micro-leaks": small recurring expenses (coffee, subscriptions, fast food).
@@ -41,7 +52,7 @@ export const generateFinancialInsights = async (transactions: Transaction[]): Pr
       }
     });
 
-    return JSON.parse(response.text || "[]");
+    return JSON.parse(response.text() || "[]");
   } catch (error) {
     console.error("Failed to generate insights:", error);
     return [
